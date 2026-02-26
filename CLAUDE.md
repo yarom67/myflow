@@ -2,7 +2,7 @@
 
 ## Project Overview
 Hebrew RTL personal finance dashboard. Single-user, no auth, client-side only.
-Premium dark fintech aesthetic (Revolut/Linear/Raycast inspired).
+Premium light fintech aesthetic (Stripe/Linear/Mercury inspired).
 
 ## Tech Stack
 - **Framework**: Vite + React 19 + TypeScript
@@ -15,7 +15,7 @@ Premium dark fintech aesthetic (Revolut/Linear/Raycast inspired).
 - **Icons**: Lucide React
 - **CSV**: PapaParse
 - **OCR**: Tesseract.js (client-side receipt scanning)
-- **Font**: Inter (Google Fonts)
+- **Fonts**: Rubik (UI + Hebrew) + DM Mono (financial numbers) via Google Fonts
 
 ## Architecture
 - All persistent data (transactions, categories, settings) stored in IndexedDB via Dexie.js
@@ -25,13 +25,14 @@ Premium dark fintech aesthetic (Revolut/Linear/Raycast inspired).
 - No backend — everything runs client-side
 
 ## Design System
-- Background: `#0A0A0F`, `#0F0F1A`
-- Cards: `#1A1A2E`, `#16213E` with `rgba(255,255,255,0.06)` borders
-- Accent: `#7C3AED` (electric purple) + `#06B6D4` (cyan secondary)
-- Text: white primary, `gray-400` secondary
-- Radius: 16px cards, 12px inputs
-- Shadows: glow shadows on accent elements
-- All colors defined in `src/index.css` via `@theme` block
+- Background: `#F4F2FC` (lavender), Surface: `#FFFFFF`
+- Accent: `#6D28D9` (violet) + `#0891B2` (cyan secondary)
+- Text: `#09090B` primary (zinc-950), `#52525B` secondary, `#A1A1AA` muted
+- Cards: `shadow-card` class (no border) — compound box-shadow + 1px ring
+- Hover lift: `shadow-card-hover` — `0 8px 24px rgba(0,0,0,0.09)`
+- Numbers: `.font-data` — DM Mono + tabular-nums + tight tracking
+- Radius: `rounded-2xl` cards, `rounded-xl` inputs/buttons
+- All colors in `src/index.css` via `@theme` block; utilities in `@layer utilities`
 
 ## RTL
 - `<html dir="rtl" lang="he">` in index.html
@@ -69,3 +70,7 @@ src/
 - **Tailwind v4 CSS reset**: Global `* { margin: 0; padding: 0 }` MUST be inside `@layer base {}` — outside a layer it overrides Tailwind utilities
 - **Mobile layout**: `MobileHeader` (fixed top) + `MobileNav` (fixed bottom) in `src/components/sidebar/`; `AppLayout` toggles between sidebar and mobile nav
 - **iOS safe area**: Bottom nav uses `env(safe-area-inset-bottom)` for notch/home indicator clearance
+- **Recharts colors**: Does not inherit CSS vars — hardcode axis ticks (`#A1A1AA`) and grid strokes (`rgba(0,0,0,0.06)`)
+
+## Repo
+- **GitHub**: https://github.com/yarom67/myflow

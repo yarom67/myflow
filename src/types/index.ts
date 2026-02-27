@@ -26,7 +26,9 @@ export interface FixedExpense {
 
 export interface Settings {
   id: string;
+  name: string;
   monthlyIncome: number;
+  savingsGoal: number;
   currency: string;
   dateFormat: string;
 }

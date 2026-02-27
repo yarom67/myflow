@@ -11,7 +11,16 @@
       "Bash(lsof:*)",
       "mcp__Claude_Preview__preview_start",
       "Bash(curl:*)",
-      "Bash(claude mcp add context7 -s project -- npx -y @upstash/context7-mcp)"
+      "Bash(claude mcp add context7 -s project -- npx -y @upstash/context7-mcp)",
+      "Bash(brew install gh)",
+      "Bash(/opt/homebrew/bin/brew install gh)",
+      "Bash(npx vercel --version)",
+      "Bash(git add CLAUDE.md)",
+      "Bash(git commit:*)",
+      "Bash(GH=/tmp/gh_cli/gh_2.87.3_macOS_arm64/bin/gh)",
+      "Bash(git push origin main)",
+      "Bash(git add vercel.json)",
+      "Bash(git push)"
     ]
   }
 }

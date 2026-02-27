@@ -14,9 +14,6 @@ export function TransactionsPage() {
   const [filters, setFilters] = useState<TFilters>({});
   const transactions = useFilteredTransactions(selectedMonth, filters);
 
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
@@ -63,15 +60,6 @@ export function TransactionsPage() {
 
       {/* Filters */}
       <TransactionFilters filters={filters} onFilterChange={setFilters} />
-
-      {/* Summary bar */}
-      <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm bg-surface border border-border rounded-xl px-4 py-3">
-        <span className="text-text-muted font-medium">{transactions.length} תנועות</span>
-        <div className="w-px h-3.5 bg-border-strong" />
-        <span className="text-success font-semibold">+{totalIncome.toLocaleString()} ₪</span>
-        <div className="w-px h-3.5 bg-border-strong" />
-        <span className="text-danger font-semibold">-{totalExpenses.toLocaleString()} ₪</span>
-      </div>
 
       {/* List */}
       <TransactionList transactions={transactions} />

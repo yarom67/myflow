@@ -10,6 +10,7 @@ export function useBudget(month: string) {
 
   return useMemo(() => {
     const monthlyIncome = settings?.monthlyIncome ?? 0;
+    const savingsGoal = settings?.savingsGoal ?? 0;
     const totalFixedExpenses = fixedExpenses.reduce((sum, fe) => sum + fe.amount, 0);
 
     const totalIncome = transactions
@@ -20,12 +21,15 @@ export function useBudget(month: string) {
       .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
 
-    const freeToSpend = monthlyIncome - totalFixedExpenses - totalExpenses;
+    const freeToSpend = monthlyIncome - totalFixedExpenses - savingsGoal - totalExpenses;
     const daysLeft = getDaysLeftInMonth();
     const dailyBudget = daysLeft > 0 ? Math.max(0, freeToSpend / daysLeft) : 0;
-    const totalBudget = monthlyIncome - totalFixedExpenses;
-    const spentPercent = totalBudget > 0 ? ((totalExpenses / totalBudget) * 100) : 0;
-    const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenses - totalFixedExpenses) / totalIncome) * 100) : 0;
+    const totalBudget = monthlyIncome - totalFixedExpenses - savingsGoal;
+    const spentPercent = totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0;
+    const savingsRate =
+      totalIncome > 0
+        ? ((totalIncome - totalExpenses - totalFixedExpenses) / totalIncome) * 100
+        : 0;
 
     // Status: green (>30% left), yellow (10-30%), red (<10%)
     const remainingPercent = totalBudget > 0 ? (freeToSpend / totalBudget) * 100 : 0;
@@ -46,6 +50,7 @@ export function useBudget(month: string) {
 
     return {
       monthlyIncome,
+      savingsGoal,
       totalFixedExpenses,
       totalIncome,
       totalExpenses,

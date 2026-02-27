@@ -18,13 +18,27 @@ export function SettingsPage() {
   const saveIncome = async () => {
     const val = parseFloat(income);
     if (!val) return;
-    await db.settings.put({ id: 'main', monthlyIncome: val, currency: settings?.currency ?? 'ILS', dateFormat: settings?.dateFormat ?? 'dd/MM/yyyy' });
+    await db.settings.put({
+      id: 'main',
+      name: settings?.name ?? '',
+      monthlyIncome: val,
+      savingsGoal: settings?.savingsGoal ?? 0,
+      currency: settings?.currency ?? 'ILS',
+      dateFormat: settings?.dateFormat ?? 'dd/MM/yyyy',
+    });
     setIncomeSaved(true);
     setTimeout(() => setIncomeSaved(false), 2000);
   };
 
   const saveCurrency = async (currency: string) => {
-    await db.settings.put({ id: 'main', monthlyIncome: settings?.monthlyIncome ?? 0, currency, dateFormat: settings?.dateFormat ?? 'dd/MM/yyyy' });
+    await db.settings.put({
+      id: 'main',
+      name: settings?.name ?? '',
+      monthlyIncome: settings?.monthlyIncome ?? 0,
+      savingsGoal: settings?.savingsGoal ?? 0,
+      currency,
+      dateFormat: settings?.dateFormat ?? 'dd/MM/yyyy',
+    });
   };
 
   const addFixedExpense = async () => {
@@ -174,12 +188,6 @@ export function SettingsPage() {
             <FileJson size={15} /> ייצא JSON
           </button>
         </div>
-      </div>
-
-      {/* About */}
-      <div className="bg-surface border border-border rounded-xl p-5">
-        <h2 className="text-base font-bold text-text-primary mb-2">אודות</h2>
-        <p className="text-sm text-text-muted">MyFlow v1.0 · כל הנתונים שמורים מקומית בדפדפן שלך · אין שרת, אין חשבון</p>
       </div>
     </div>
   );

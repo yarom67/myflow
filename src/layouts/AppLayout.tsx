@@ -2,8 +2,10 @@ import { Outlet } from 'react-router';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { MobileHeader } from '../components/sidebar/MobileHeader';
 import { MobileNav } from '../components/sidebar/MobileNav';
+import { OnboardingWizard } from '../components/onboarding/OnboardingWizard';
 import { useUiStore } from '../store/uiStore';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useSettings } from '../db/hooks';
 
 function BackgroundOrbs() {
   return (
@@ -33,6 +35,13 @@ export function AppLayout() {
   const mobileMenuOpen = useUiStore((s) => s.mobileMenuOpen);
   const closeMobileMenu = useUiStore((s) => s.closeMobileMenu);
   const isMobile = useIsMobile();
+  const settings = useSettings();
+
+  // Still loading from IndexedDB
+  if (settings === undefined) return null;
+
+  // First-time user (or after migration wipes mock data)
+  if (settings.name === '') return <OnboardingWizard />;
 
   return (
     <div className="flex min-h-screen bg-background">

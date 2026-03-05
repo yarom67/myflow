@@ -1,6 +1,7 @@
-import { motion, useSpring, useTransform } from 'motion/react';
-import { useEffect } from 'react';
+import { motion } from 'motion/react';
 import { CalendarDays, TrendingUp } from 'lucide-react';
+import { BorderBeam } from '../magicui/border-beam';
+import { NumberTicker } from '../magicui/number-ticker';
 
 interface HeroCardProps {
   freeToSpend: number;
@@ -16,37 +17,23 @@ const statusConfig = {
     accentColor: '#059669',
     label: 'מצב תקין',
     badgeClass: 'text-success bg-success/10',
+    beamColor: '#059669',
   },
   warning: {
     color: 'text-warning',
     accentColor: '#D97706',
     label: 'שים לב',
     badgeClass: 'text-warning bg-warning/10',
+    beamColor: '#D97706',
   },
   danger: {
     color: 'text-danger',
     accentColor: '#DC2626',
     label: 'חריגה מהתקציב',
     badgeClass: 'text-danger bg-danger/10',
+    beamColor: '#DC2626',
   },
 };
-
-function AnimatedNumber({
-  value,
-  formatCurrency,
-}: {
-  value: number;
-  formatCurrency: (amount: number) => string;
-}) {
-  const spring = useSpring(0, { stiffness: 50, damping: 18 });
-  const display = useTransform(spring, (v) => formatCurrency(Math.round(v)));
-
-  useEffect(() => {
-    spring.set(value);
-  }, [spring, value]);
-
-  return <motion.span>{display}</motion.span>;
-}
 
 export function HeroCard({
   freeToSpend,
@@ -65,6 +52,14 @@ export function HeroCard({
       className="relative overflow-hidden rounded-2xl bg-surface shadow-card"
       style={{ borderTop: `3px solid ${config.accentColor}` }}
     >
+      <BorderBeam
+        size={80}
+        duration={8}
+        colorFrom={config.beamColor}
+        colorTo="#a78bfa"
+        borderWidth={1.5}
+      />
+
       <div className="p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-6">
         {/* Left — main figure */}
         <div className="flex-1 flex flex-col gap-2">
@@ -72,11 +67,11 @@ export function HeroCard({
             {config.label}
           </span>
           <p className="text-sm font-medium text-text-secondary">פנוי להוצאה החודש</p>
-          <span
+          <NumberTicker
+            value={freeToSpend}
+            formatFn={formatCurrency}
             className={`text-4xl sm:text-5xl lg:text-6xl font-black font-data tracking-tight ${config.color}`}
-          >
-            <AnimatedNumber value={freeToSpend} formatCurrency={formatCurrency} />
-          </span>
+          />
         </div>
 
         {/* Divider */}

@@ -36,7 +36,5 @@ export const CURRENCY_OPTIONS = [
 export const NAV_ITEMS = [
   { path: '/', label: 'דשבורד', icon: 'LayoutDashboard' },
   { path: '/transactions', label: 'תנועות', icon: 'ArrowLeftRight' },
-  { path: '/categories', label: 'קטגוריות', icon: 'Grid3X3' },
-  { path: '/reports', label: 'דוחות', icon: 'BarChart3' },
   { path: '/settings', label: 'הגדרות', icon: 'Settings' },
 ] as const;

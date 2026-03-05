@@ -1,6 +1,15 @@
 import { Search } from 'lucide-react';
 import { useCategories } from '../../db/hooks';
 import type { TransactionFilters } from '../../types';
+import { Input } from '../ui/input';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 interface Props {
   filters: TransactionFilters;
@@ -11,48 +20,49 @@ export function TransactionFilters({ filters, onFilterChange }: Props) {
   const categories = useCategories();
   const set = (partial: Partial<TransactionFilters>) => onFilterChange({ ...filters, ...partial });
 
+  const activeType = filters.type ?? 'all';
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       {/* Search */}
       <div className="relative flex-1 min-w-48">
         <Search size={15} className="absolute start-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-        <input
+        <Input
           type="text"
           placeholder="חיפוש..."
           value={filters.search ?? ''}
           onChange={(e) => set({ search: e.target.value })}
-          className="w-full bg-surface border border-border rounded-md ps-9 pe-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
+          className="ps-9"
         />
       </div>
 
-      {/* Type toggle */}
-      <div className="flex bg-surface border border-border rounded-md overflow-hidden">
-        {(['all', 'expense', 'income'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => set({ type: t === 'all' ? undefined : t })}
-            className={`px-3 py-2 text-sm transition-colors ${
-              (t === 'all' && !filters.type) || filters.type === t
-                ? 'bg-accent text-white'
-                : 'text-text-secondary hover:text-text-primary'
-            }`}
-          >
-            {t === 'all' ? 'הכל' : t === 'expense' ? 'הוצאות' : 'הכנסות'}
-          </button>
-        ))}
-      </div>
+      {/* Type tabs */}
+      <Tabs
+        value={activeType}
+        onValueChange={(v) => set({ type: v === 'all' ? undefined : (v as 'expense' | 'income') })}
+      >
+        <TabsList>
+          <TabsTrigger value="all">הכל</TabsTrigger>
+          <TabsTrigger value="expense">הוצאות</TabsTrigger>
+          <TabsTrigger value="income">הכנסות</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Category filter */}
-      <select
-        value={filters.categoryId ?? ''}
-        onChange={(e) => set({ categoryId: e.target.value || undefined })}
-        className="bg-surface border border-border rounded-md px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent transition-colors"
+      <Select
+        value={filters.categoryId ?? '__all__'}
+        onValueChange={(v) => set({ categoryId: v === '__all__' ? undefined : v })}
       >
-        <option value="">כל הקטגוריות</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>
+        <SelectTrigger className="w-40">
+          <SelectValue placeholder="כל הקטגוריות" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">כל הקטגוריות</SelectItem>
+          {categories.map((c) => (
+            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
 import { X } from 'lucide-react';
 import { db } from '../../db';
 import { useCategories } from '../../db/hooks';
@@ -8,19 +7,50 @@ import { generateId } from '../../lib/id';
 import { getToday } from '../../lib/dates';
 import { CategoryIconGrid } from './CategoryIconGrid';
 import type { TransactionType } from '../../types';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from '../ui/drawer';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '../ui/dialog';
 
-export function AddTransactionModal() {
-  const { activeModal, editingId, closeModal } = useUiStore();
-  const categories = useCategories();
-  const isOpen = activeModal === 'addTransaction';
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false
+  );
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return isMobile;
+}
 
+interface FormProps {
+  editingId: string | null;
+  categories: ReturnType<typeof useCategories>;
+  onClose: () => void;
+  isOpen: boolean;
+}
+
+function TransactionForm({ editingId, categories, onClose, isOpen }: FormProps) {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<TransactionType>('expense');
   const [categoryId, setCategoryId] = useState<string>('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(getToday());
 
-  // Preselect first expense category
   useEffect(() => {
     if (categories.length > 0 && !categoryId) {
       const first = categories.find((c) => c.name !== 'הכנסה');
@@ -28,7 +58,6 @@ export function AddTransactionModal() {
     }
   }, [categories, categoryId]);
 
-  // Load existing transaction when editing
   useEffect(() => {
     if (!editingId || !isOpen) return;
     db.transactions.get(editingId).then((tx) => {
@@ -50,7 +79,7 @@ export function AddTransactionModal() {
     setDate(getToday());
   };
 
-  const handleClose = () => { closeModal(); reset(); };
+  const handleClose = () => { onClose(); reset(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +94,6 @@ export function AddTransactionModal() {
     handleClose();
   };
 
-  // Adjust category when switching type
   const handleTypeSwitch = (t: TransactionType) => {
     setType(t);
     if (t === 'income') {
@@ -82,101 +110,124 @@ export function AddTransactionModal() {
     : categories.filter((c) => c.name !== 'הכנסה');
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-          <motion.div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={handleClose}
+    <form onSubmit={handleSubmit} className="space-y-5 px-1">
+      {/* Amount */}
+      <div className="text-center pt-2">
+        <div className="relative inline-flex items-center">
+          <span className="text-3xl text-text-muted ms-2">₪</span>
+          <input
+            type="number"
+            placeholder="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            autoFocus
+            className="text-5xl font-bold text-center w-48 bg-transparent text-text-primary placeholder:text-text-muted focus:outline-none"
           />
-          <motion.div
-            className="relative w-full sm:max-w-md bg-surface border border-border rounded-t-2xl sm:rounded-2xl p-6 z-10 max-h-[90vh] overflow-y-auto"
-            initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-text-primary">
-                {editingId ? 'ערוך תנועה' : 'הוסף תנועה'}
-              </h2>
-              <button onClick={handleClose} className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors">
+        </div>
+      </div>
+
+      {/* Type toggle */}
+      <div className="flex bg-background border border-border rounded-xl overflow-hidden">
+        <button
+          type="button"
+          onClick={() => handleTypeSwitch('expense')}
+          className={`flex-1 py-2.5 text-sm font-medium transition-colors rounded-xl ${
+            type === 'expense' ? 'bg-danger text-white' : 'text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          הוצאה
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTypeSwitch('income')}
+          className={`flex-1 py-2.5 text-sm font-medium transition-colors rounded-xl ${
+            type === 'income' ? 'bg-success text-white' : 'text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          הכנסה
+        </button>
+      </div>
+
+      {/* Category grid */}
+      <div>
+        <Label className="text-xs text-text-muted mb-2 block">קטגוריה</Label>
+        <CategoryIconGrid categories={filteredCats} selectedId={categoryId} onSelect={setCategoryId} />
+      </div>
+
+      {/* Description */}
+      <Input
+        type="text"
+        placeholder="תיאור (אופציונלי)"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+
+      {/* Date */}
+      <Input
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+      />
+
+      {/* Submit */}
+      <Button type="submit" className="w-full" size="lg">
+        {editingId ? 'שמור שינויים' : 'הוסף תנועה'}
+      </Button>
+    </form>
+  );
+}
+
+export function AddTransactionModal() {
+  const { activeModal, editingId, closeModal } = useUiStore();
+  const categories = useCategories();
+  const isOpen = activeModal === 'addTransaction';
+  const isMobile = useIsMobile();
+
+  const title = editingId ? 'ערוך תנועה' : 'הוסף תנועה';
+
+  if (isMobile) {
+    return (
+      <Drawer open={isOpen} onOpenChange={(o) => !o && closeModal()}>
+        <DrawerContent>
+          <DrawerHeader className="flex items-center justify-between">
+            <DrawerTitle>{title}</DrawerTitle>
+            <DrawerClose asChild>
+              <button className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors">
                 <X size={18} />
               </button>
-            </div>
+            </DrawerClose>
+          </DrawerHeader>
+          <div className="px-4 pb-6 overflow-y-auto">
+            <TransactionForm
+              editingId={editingId}
+              categories={categories}
+              onClose={closeModal}
+              isOpen={isOpen}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Amount */}
-              <div className="text-center">
-                <div className="relative inline-flex items-center">
-                  <span className="text-3xl text-text-muted ms-2">₪</span>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    autoFocus
-                    className="text-5xl font-bold text-center w-48 bg-transparent text-text-primary placeholder:text-text-muted focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Type toggle */}
-              <div className="flex bg-background border border-border rounded-xl overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => handleTypeSwitch('expense')}
-                  className={`flex-1 py-2.5 text-sm font-medium transition-colors rounded-xl ${
-                    type === 'expense' ? 'bg-danger text-white' : 'text-text-secondary hover:text-text-primary'
-                  }`}
-                >
-                  הוצאה
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTypeSwitch('income')}
-                  className={`flex-1 py-2.5 text-sm font-medium transition-colors rounded-xl ${
-                    type === 'income' ? 'bg-success text-white' : 'text-text-secondary hover:text-text-primary'
-                  }`}
-                >
-                  הכנסה
-                </button>
-              </div>
-
-              {/* Category grid */}
-              <div>
-                <p className="text-xs text-text-muted mb-2">קטגוריה</p>
-                <CategoryIconGrid categories={filteredCats} selectedId={categoryId} onSelect={setCategoryId} />
-              </div>
-
-              {/* Description */}
-              <input
-                type="text"
-                placeholder="תיאור (אופציונלי)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
-              />
-
-              {/* Date */}
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent transition-colors"
-              />
-
-              {/* Submit */}
-              <button
-                type="submit"
-                className="w-full py-3 bg-accent hover:bg-accent-light text-white font-semibold rounded-xl transition-colors"
-              >
-                {editingId ? 'שמור שינויים' : 'הוסף תנועה'}
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+  return (
+    <Dialog open={isOpen} onOpenChange={(o) => !o && closeModal()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogClose asChild>
+            <button className="absolute start-4 top-4 p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors">
+              <X size={18} />
+            </button>
+          </DialogClose>
+        </DialogHeader>
+        <TransactionForm
+          editingId={editingId}
+          categories={categories}
+          onClose={closeModal}
+          isOpen={isOpen}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

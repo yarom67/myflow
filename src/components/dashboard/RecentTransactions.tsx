@@ -1,11 +1,12 @@
 import { Link } from 'react-router';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { icons } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useMonthTransactions, useCategories } from '../../db/hooks';
 import { useCurrency } from '../../hooks/useCurrency';
 import { formatShortDate } from '../../lib/dates';
 import { useUiStore } from '../../store/uiStore';
+import { BlurFade } from '../magicui/blur-fade';
+import { ScrollArea } from '../ui/scroll-area';
 
 const LucideIcon = ({ name, ...props }: { name: string } & Record<string, any>) => {
   const Icon = icons[name as keyof typeof icons];
@@ -31,7 +32,7 @@ export function RecentTransactions({ month }: { month: string }) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => openModal('addTransaction')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-accent hover:text-accent-light transition-colors bg-accent/10 hover:bg-accent/15 px-2.5 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-xs font-semibold text-accent-violet hover:text-accent-violet/80 transition-colors bg-accent-violet/10 hover:bg-accent-violet/15 px-2.5 py-1.5 rounded-lg"
           >
             <Plus size={12} />
             הוסף
@@ -51,50 +52,48 @@ export function RecentTransactions({ month }: { month: string }) {
           <p className="text-text-muted text-sm">אין תנועות לחודש זה</p>
           <button
             onClick={() => openModal('addTransaction')}
-            className="text-xs text-accent hover:text-accent-light transition-colors mt-1"
+            className="text-xs text-accent-violet hover:text-accent-violet/80 transition-colors mt-1"
           >
             הוסף תנועה ראשונה
           </button>
         </div>
       ) : (
-        <div className="space-y-0.5">
-          {recent.map((tx, i) => {
-            const cat = getCat(tx.categoryId);
-            return (
-              <motion.div
-                key={tx.id}
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.04, duration: 0.25 }}
-                className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-hover transition-colors cursor-pointer group"
-                onClick={() => openModal('addTransaction', tx.id)}
-              >
-                {cat && (
+        <ScrollArea className="max-h-[300px]">
+          <div className="space-y-0.5">
+            {recent.map((tx, i) => {
+              const cat = getCat(tx.categoryId);
+              return (
+                <BlurFade key={tx.id} delay={i * 0.05} direction="up">
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: cat.color + '18' }}
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-hover transition-colors cursor-pointer group"
+                    onClick={() => openModal('addTransaction', tx.id)}
                   >
-                    <LucideIcon name={cat.icon} size={16} style={{ color: cat.color }} />
+                    {cat && (
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: cat.color + '18' }}
+                      >
+                        <LucideIcon name={cat.icon} size={16} style={{ color: cat.color }} />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text-primary truncate">
+                        {tx.description || cat?.name || '—'}
+                      </p>
+                      <p className="text-xs text-text-muted mt-0.5">{formatShortDate(tx.date)}</p>
+                    </div>
+                    <span
+                      className={`text-sm font-bold ${tx.type === 'income' ? 'text-success' : 'text-danger'}`}
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
+                      {tx.type === 'income' ? '+' : '-'}{format(tx.amount)}
+                    </span>
                   </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text-primary truncate">
-                    {tx.description || cat?.name || '—'}
-                  </p>
-                  <p className="text-xs text-text-muted mt-0.5">{formatShortDate(tx.date)}</p>
-                </div>
-                <span
-                  className={`text-sm font-bold ${
-                    tx.type === 'income' ? 'text-success' : 'text-danger'
-                  }`}
-                  style={{ fontVariantNumeric: 'tabular-nums' }}
-                >
-                  {tx.type === 'income' ? '+' : '-'}{format(tx.amount)}
-                </span>
-              </motion.div>
-            );
-          })}
-        </div>
+                </BlurFade>
+              );
+            })}
+          </div>
+        </ScrollArea>
       )}
     </div>
   );

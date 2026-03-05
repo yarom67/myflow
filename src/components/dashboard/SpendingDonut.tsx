@@ -51,13 +51,9 @@ export function SpendingDonut({ month }: { month: string }) {
             </defs>
             <Pie
               data={dataWithPercent}
-              cx="50%"
-              cy="50%"
-              innerRadius={55}
-              outerRadius={82}
-              paddingAngle={3}
-              dataKey="value"
-              stroke="none"
+              cx="50%" cy="50%"
+              innerRadius={55} outerRadius={82}
+              paddingAngle={3} dataKey="value" stroke="none"
             >
               {dataWithPercent.map((entry, i) => (
                 <Cell key={i} fill={`url(#donut-grad-${i})`} />

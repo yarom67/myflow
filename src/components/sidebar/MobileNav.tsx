@@ -7,7 +7,7 @@ import { NAV_ITEMS } from '../../lib/constants';
 export function MobileNav() {
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden border-t border-border bg-surface/92 backdrop-blur-xl safe-bottom">
-      <div className="flex items-stretch justify-around h-16">
+      <div className="flex items-stretch justify-around h-[60px]">
         {NAV_ITEMS.map((item) => {
           const Icon = icons[item.icon as keyof typeof icons] as React.FC<{ size?: number; className?: string }> | undefined;
 
@@ -16,25 +16,25 @@ export function MobileNav() {
               key={item.path}
               to={item.path}
               end={item.path === '/'}
-              className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative"
+              className="flex-1 flex flex-col items-center justify-center gap-1.5 transition-colors relative"
             >
               {({ isActive }) => (
                 <>
                   {isActive && (
                     <motion.div
                       layoutId="mobile-nav-indicator"
-                      className="absolute top-0 inset-x-0 h-0.5 bg-accent rounded-b-full"
+                      className="absolute top-0 inset-x-3 h-0.5 bg-accent-violet rounded-b-full"
                     />
                   )}
                   {Icon && (
                     <Icon
-                      size={20}
-                      className={`transition-colors duration-200 ${isActive ? 'text-accent' : 'text-text-muted'}`}
+                      size={22}
+                      className={`transition-colors duration-200 ${isActive ? 'text-accent-violet' : 'text-text-muted'}`}
                     />
                   )}
                   <span
-                    className={`text-[10px] font-medium transition-colors duration-200 ${
-                      isActive ? 'text-accent' : 'text-text-muted'
+                    className={`text-[10px] font-semibold transition-colors duration-200 ${
+                      isActive ? 'text-accent-violet' : 'text-text-muted'
                     }`}
                   >
                     {item.label}

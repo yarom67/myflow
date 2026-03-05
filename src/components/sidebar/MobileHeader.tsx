@@ -20,8 +20,8 @@ export function MobileHeader() {
 
       {/* Logo */}
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl bg-accent/20 flex items-center justify-center">
-          <Wallet size={16} className="text-accent" />
+        <div className="w-8 h-8 rounded-xl bg-accent-violet/15 flex items-center justify-center">
+          <Wallet size={16} className="text-accent-violet" />
         </div>
         <span className="text-base font-bold text-text-primary tracking-tight">MyFlow</span>
       </div>

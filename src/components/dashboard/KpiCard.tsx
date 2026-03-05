@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
-import { motion, useSpring, useTransform } from 'motion/react';
+import { motion } from 'motion/react';
+import { MagicCard } from '../magicui/magic-card';
+import { NumberTicker } from '../magicui/number-ticker';
 
 interface KpiCardProps {
   label: string;
@@ -11,23 +12,6 @@ interface KpiCardProps {
   ring?: { percent: number; color: string };
 }
 
-function AnimatedValue({
-  value,
-  formatValue,
-}: {
-  value: number;
-  formatValue: (v: number) => string;
-}) {
-  const spring = useSpring(0, { stiffness: 50, damping: 20 });
-  const display = useTransform(spring, (v) => formatValue(Math.round(v)));
-
-  useEffect(() => {
-    spring.set(value);
-  }, [spring, value]);
-
-  return <motion.span>{display}</motion.span>;
-}
-
 function ProgressRing({ percent, color }: { percent: number; color: string }) {
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
@@ -36,22 +20,10 @@ function ProgressRing({ percent, color }: { percent: number; color: string }) {
 
   return (
     <svg width="44" height="44" viewBox="0 0 44 44" className="shrink-0">
-      <circle
-        cx="22"
-        cy="22"
-        r={radius}
-        fill="none"
-        stroke="rgba(0,0,0,0.07)"
-        strokeWidth="3"
-      />
+      <circle cx="22" cy="22" r={radius} fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth="3" />
       <motion.circle
-        cx="22"
-        cy="22"
-        r={radius}
-        fill="none"
-        stroke={color}
-        strokeWidth="3"
-        strokeLinecap="round"
+        cx="22" cy="22" r={radius} fill="none"
+        stroke={color} strokeWidth="3" strokeLinecap="round"
         strokeDasharray={circumference}
         initial={{ strokeDashoffset: circumference }}
         animate={{ strokeDashoffset: offset }}
@@ -59,13 +31,8 @@ function ProgressRing({ percent, color }: { percent: number; color: string }) {
         transform="rotate(-90 22 22)"
       />
       <text
-        x="22"
-        y="22"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="#52525B"
-        fontSize="8"
-        fontWeight="600"
+        x="22" y="22" textAnchor="middle" dominantBaseline="central"
+        fill="#52525B" fontSize="8" fontWeight="600"
         fontFamily="DM Mono, ui-monospace, monospace"
       >
         {Math.round(clampedPercent)}%
@@ -80,38 +47,35 @@ export function KpiCard({ label, value, formatValue, icon, trend, ring }: KpiCar
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col gap-3 rounded-2xl bg-surface shadow-card p-4 sm:p-5"
+      className="rounded-2xl bg-surface shadow-card overflow-hidden"
     >
-      {/* Top row: label + accessory */}
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-xs font-medium text-text-secondary leading-tight">{label}</span>
-        {ring ? (
-          <ProgressRing percent={ring.percent} color={ring.color} />
-        ) : (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-hover border border-border">
-            {icon}
-          </div>
-        )}
-      </div>
+      <MagicCard className="p-4 sm:p-5 flex flex-col gap-3 w-full">
+        {/* Top row: label + accessory */}
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-xs font-medium text-text-secondary leading-tight">{label}</span>
+          {ring ? (
+            <ProgressRing percent={ring.percent} color={ring.color} />
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-hover border border-border">
+              {icon}
+            </div>
+          )}
+        </div>
 
-      {/* Bottom: value + trend */}
-      <div className="flex flex-col gap-0.5">
-        <span
-          className="text-2xl font-black font-data text-text-primary tracking-tight"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
-        >
-          <AnimatedValue value={value} formatValue={formatValue} />
-        </span>
-        {trend && (
-          <span
-            className={`text-xs font-semibold ${
-              trend.positive ? 'text-success' : 'text-danger'
-            }`}
-          >
-            {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}%
-          </span>
-        )}
-      </div>
+        {/* Bottom: value + trend */}
+        <div className="flex flex-col gap-0.5">
+          <NumberTicker
+            value={value}
+            formatFn={formatValue}
+            className="text-2xl font-black font-data text-text-primary tracking-tight"
+          />
+          {trend && (
+            <span className={`text-xs font-semibold ${trend.positive ? 'text-success' : 'text-danger'}`}>
+              {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}%
+            </span>
+          )}
+        </div>
+      </MagicCard>
     </motion.div>
   );
 }

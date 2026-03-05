@@ -6,29 +6,8 @@ import { OnboardingWizard } from '../components/onboarding/OnboardingWizard';
 import { useUiStore } from '../store/uiStore';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useSettings } from '../db/hooks';
-
-function BackgroundOrbs() {
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-      {/* Violet ambient orb — top-end corner */}
-      <div
-        className="absolute -top-48 -end-48 w-[600px] h-[600px] rounded-full opacity-80"
-        style={{
-          background: 'radial-gradient(circle, rgba(109,40,217,0.07) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-      />
-      {/* Cyan ambient orb — bottom-start corner */}
-      <div
-        className="absolute -bottom-48 -start-48 w-[500px] h-[500px] rounded-full opacity-70"
-        style={{
-          background: 'radial-gradient(circle, rgba(8,145,178,0.06) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-      />
-    </div>
-  );
-}
+import { Particles } from '../components/magicui/particles';
+import { Toaster } from '../components/ui/sonner';
 
 export function AppLayout() {
   const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
@@ -45,7 +24,14 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <BackgroundOrbs />
+      {/* Particles background */}
+      <Particles
+        className="fixed inset-0 z-0 pointer-events-none"
+        quantity={25}
+        color="#6D28D9"
+        size={0.5}
+        staticity={60}
+      />
 
       {/* Mobile backdrop overlay */}
       {mobileMenuOpen && (
@@ -76,6 +62,9 @@ export function AppLayout() {
 
       {/* Mobile bottom navigation */}
       <MobileNav />
+
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   );
 }

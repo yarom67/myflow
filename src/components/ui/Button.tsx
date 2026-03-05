@@ -1,61 +1,53 @@
-import type { ReactNode, ButtonHTMLAttributes } from 'react';
-import { motion } from 'motion/react';
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { Slot } from 'radix-ui';
+import { cn } from '../../lib/utils';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
-type ButtonSize = 'sm' | 'md' | 'lg';
+const buttonVariants = cva(
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive: 'bg-destructive text-white hover:bg-destructive/90',
+        outline: 'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+        xs: 'h-6 gap-1 rounded-md px-2 text-xs',
+        sm: 'h-8 gap-1.5 rounded-md px-3',
+        lg: 'h-10 rounded-md px-6',
+        icon: 'size-9',
+        'icon-sm': 'size-8',
+        'icon-lg': 'size-10',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+);
 
-interface ButtonProps {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  children: ReactNode;
-  className?: string;
-  onClick?: () => void;
-  disabled?: boolean;
-  type?: ButtonHTMLAttributes<HTMLButtonElement>['type'];
-}
-
-const variantStyles: Record<ButtonVariant, string> = {
-  primary:
-    'bg-accent text-white hover:bg-accent-light active:bg-accent-dark shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_1px_rgba(109,40,217,0.6)]',
-  secondary:
-    'bg-surface text-text-primary shadow-card hover:bg-surface-hover hover:shadow-card-hover',
-  ghost:
-    'bg-transparent text-text-secondary hover:text-text-primary hover:bg-surface-hover',
-};
-
-const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-sm rounded-xl',
-  md: 'px-4 py-2.5 text-sm rounded-xl',
-  lg: 'px-6 py-3 text-base rounded-xl',
-};
-
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  children,
-  className = '',
-  onClick,
-  disabled = false,
-  type = 'button',
-}: ButtonProps) {
+function Button({
+  className,
+  variant = 'default',
+  size = 'default',
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : 'button';
   return (
-    <motion.button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      whileHover={disabled ? undefined : { scale: 1.02 }}
-      whileTap={disabled ? undefined : { scale: 0.97 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      className={`
-        inline-flex items-center justify-center gap-2 font-medium
-        transition-colors duration-200
-        ${variantStyles[variant]}
-        ${sizeStyles[size]}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        ${className}
-      `}
-    >
-      {children}
-    </motion.button>
+    <Comp
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
   );
 }
+
+export { Button, buttonVariants };
